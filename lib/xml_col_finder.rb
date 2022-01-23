@@ -33,6 +33,7 @@ class XMLColFinder
   def to_code()
 
     @tags = {}
+
     xpath, remaining = @to_a
 
     eid = getid(xpath)
@@ -45,13 +46,13 @@ class XMLColFinder
 
   private
 
-  def formatline(pid, eid=nil, key=nil, tail=nil)
+  def formatline(pid, eid=nil, key=nil, tail=nil, index: nil)
 
     if eid then
       line = "%s = %s.element(\"%s\")" % [eid, pid, key]
       line += '.text' if tail.is_a? String
     else
-      line = "%s.text" % pid
+      line = index ? ("%s[%d].text" % [pid, index]) : ("%s.text" % pid)
     end
 
     return line
@@ -119,8 +120,6 @@ class XMLColFinder
 
         else
 
-          puts "path.join('/'): " + path.join('/').inspect
-          puts 'txt:' + txt.inspect
 
           h2[stickypath.sub(/^\//,'')] ||= []
           h2[stickypath.sub(/^\//,'')] << [path.join('/'), txt]
@@ -147,6 +146,8 @@ class XMLColFinder
 
   def scan(a, eid='doc', pid=eid.clone)
 
+    #puts 'a: ' + a.inspect if @debug
+
     a.map do |row|
 
       head, tail = row
@@ -160,9 +161,17 @@ class XMLColFinder
         if head[0] == '/' then
 
           key = head[1..-1]
+          puts 'key: ' + key.inspect if @debug
 
           eid = getid(key)
-          hline = formatline(pid, eid, key, tail)
+
+          hline = if tail.is_a? Array and tail.all? {|x| x.is_a? String } then
+            @prev_xpath = true
+            "%s = %s.xpath(\"%s\")" % [eid, pid, key]
+          else
+            @prev_xpath = false
+            formatline(pid, eid, key, tail)
+          end
 
         else
 
@@ -171,7 +180,20 @@ class XMLColFinder
       end
 
       if tail.is_a? Array then
-        tline = scan(tail, eid)
+
+        if tail.compact[0].is_a? Array then
+
+          puts 'tail: ' + tail.inspect if @debug
+
+          tline = scan(tail, eid)
+
+        elsif tail.all? {|x| x.is_a? String} and tail[0][0] != '/'
+          puts '_tail: ' + tail.inspect if @debug
+          tline = tail.map.with_index do |x,i|
+            formatline(pid=eid, index: i)
+          end.join("\n")
+
+        end
       end
 
       [hline, tline]
