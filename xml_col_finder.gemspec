@@ -1,7 +1,8 @@
 Gem::Specification.new do |s|
   s.name = 'xml_col_finder'
-  s.version = '0.1.0'
-  s.summary = 'Attempts to return the relative xpath for each element containing text.'
+  s.version = '0.1.1'
+  s.summary = 'Attempts to return the relative xpath for each ' +
+      'element containing text.'
   s.authors = ['James Robertson']
   s.files = Dir['lib/xml_col_finder.rb']
   s.add_runtime_dependency('rexle', '~> 1.5', '>=1.5.14')

@@ -24,10 +24,13 @@ class XMLColFinder
 
     end
 
+    #@to_a = a
     h = group_by_xpath(a)
     @to_a = truncate_xpath(h).flatten(1)
 
   end
+
+  private
 
   # Groups xpath by matching branches
   #
@@ -48,38 +51,40 @@ class XMLColFinder
 
     h2 = {}
 
-    n = 0
-    while n < a.length
+    a.each do |path,txt|
 
-      path, txt = a[n]
       stickypath = ''
 
-      path.each do |name|
+      n = 0
+      while n < path.length
 
-        if @debug then
-          puts "h[+ stickypath + '/' + name]: " \
-              + h[stickypath + '/' + name].inspect
-        end
+        name = path[n]
 
-        if h[stickypath + '/' + name] > 1 then
+        if h[stickypath + '/' + name] > 1
 
           stickypath += '/' + name
-          next
+
+          if (n == path.length - 1) then
+
+            h2[stickypath.sub(/^\//,'')] ||= []
+            h2[stickypath.sub(/^\//,'')] << txt
+
+          end
 
         else
 
-          h2[stickypath] ||= []
-          h2[stickypath] << [path.join('/'), txt]
+          puts "path.join('/'): " + path.join('/').inspect
+          puts 'txt:' + txt.inspect
+
+          h2[stickypath.sub(/^\//,'')] ||= []
+          h2[stickypath.sub(/^\//,'')] << [path.join('/'), txt]
           break
 
         end
-
+        n += 1
       end
 
-      n += 1
-
     end
-
 
     if h2.length > 1 then
 
@@ -91,32 +96,49 @@ class XMLColFinder
       return h2
 
     end
+
   end
 
   def truncate_xpath(records, offset=0)
 
-    records.map do |key, value|
+    records.map do |record|
 
-      new_key = key.sub(/^\/+/,'')[offset..-1]
-      len = new_key.length
-      #puts len.inspect
-      puts 'new_key: ' + new_key.inspect if @debug
+      next unless record
+      if record.is_a? Array and (record[0].is_a? Array or record.length > 2) then
 
-      new_value = value.map do |k2, v2|
+        truncate_xpath(record, offset)
 
-        puts 'k2: ' + k2.inspect if @debug
-        new_k2 = k2.sub(/^\/+/,'')[offset+len..-1]
-        new_len = new_k2.length
-        puts 'new_k2: ' + new_k2.inspect if @debug
-        puts 'v2: ' + v2.inspect if @debug
+      else
 
-        v2b = v2.is_a?(Array) ? truncate_xpath(v2, offset+len+new_len) : v2
+        if record.is_a? String then
 
-        [new_k2, v2b]
+          value = record
+          puts 'valuex: ' + value.inspect if @debug
+          value
 
+        else
+
+          key, value = record
+          puts 'key: ' + key.inspect if @debug
+
+          new_key = key[offset..-1]
+          puts 'new_key: ' + new_key.inspect if @debug
+
+          next unless new_key
+          len = new_key.length
+
+          if value.is_a? Array then
+
+            [new_key, truncate_xpath(value, offset+len)]
+
+          else
+
+            puts 'value: ' + value.inspect if @debug
+            [new_key, value]
+
+          end
+        end
       end
-
-      [new_key, new_value]
 
     end
 
