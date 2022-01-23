@@ -30,7 +30,53 @@ class XMLColFinder
 
   end
 
+  def to_code()
+
+    @tags = {}
+    xpath, remaining = @to_a
+
+    eid = getid(xpath)
+    linex = formatline('doc', eid, xpath)
+    a = scan(remaining, eid)
+
+    a.flatten.compact.prepend linex
+
+  end
+
   private
+
+  def formatline(pid, eid=nil, key=nil, tail=nil)
+
+    if eid then
+      line = "%s = %s.element(\"%s\")" % [eid, pid, key]
+      line += '.text' if tail.is_a? String
+    else
+      line = "%s.text" % pid
+    end
+
+    return line
+  end
+
+
+  def getid(rawtag)
+
+    rawtagx = rawtag.split('/').last[/\w+/]
+
+    tag = case rawtagx.to_sym
+    when :a
+      'link'
+    else
+      rawtagx
+    end
+
+    if @tags.include?(tag) then
+      @tags[tag] =~ /\d+$/ ? @tags[tag].succ! : @tags[tag] += '1'
+    else
+      @tags[tag] = tag
+    end
+
+  end
+
 
   # Groups xpath by matching branches
   #
@@ -98,6 +144,41 @@ class XMLColFinder
     end
 
   end
+
+  def scan(a, eid='doc', pid=eid.clone)
+
+    a.map do |row|
+
+      head, tail = row
+
+      if head.is_a? Array then
+
+        hline = scan(row, eid, pid)
+
+      elsif head
+
+        if head[0] == '/' then
+
+          key = head[1..-1]
+
+          eid = getid(key)
+          hline = formatline(pid, eid, key, tail)
+
+        else
+
+          hline = formatline(pid=eid)
+        end
+      end
+
+      if tail.is_a? Array then
+        tline = scan(tail, eid)
+      end
+
+      [hline, tline]
+    end
+
+  end
+
 
   def truncate_xpath(records, offset=0)
 
