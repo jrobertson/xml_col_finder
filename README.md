@@ -6,23 +6,23 @@
     a = XMLColFinder.new(s).to_a
 
     pp a
-    <pre>
-    ["a[@class='tapItem']/div[@class='slider_container']/div[@class='slider_list']/div[@class='slider_item']/div[@class='job_seen_beacon']",    
-     [[["/table[@class='jobCard_mainContent']/tbody/tr/td[@class='resultContent']",
-        [[["/div[@class='heading4']/h2[@class='jobTitle']/span", "Software Engineering - Graduate Programme"]],
-         ["/div[@class='heading6']",
-          [["/span[@class='companyName']/a[@class='turnstileLink']", "NatWest Group"],
-           ["/span[@class='ratingsDisplay']/a[@class='ratingLink']/span[@class='ratingNumber']/span", "3.3"],
-           ["/div[@class='companyLocation']", "Edinburgh"],
-           ["/div[@class='metadata']/div[@class='salary-snippet']/span", "£31,850 a year"]]]]]],
-      ["/table[@class='jobCardShelfContainer']/tbody/tr[@class='underShelfFooter']/td/div[@class='heading6']",
-       [["/div[@class='job-snippet']/ul",
-         [nil,
-          ["/li",
-           ["From home working to job sharing, visit the remote and flexible working page on our website to find out more.",
-            "And on top of your salary, you’ll also have access…"]]]],
-        [[["/span[@class='date']/span[@class='visually-hidden']", "Posted"]]]]]]] 
-    </pre>
+<pre>
+["a[@class='tapItem']/div[@class='slider_container']/div[@class='slider_list']/div[@class='slider_item']/div[@class='job_seen_beacon']",    
+ [[["/table[@class='jobCard_mainContent']/tbody/tr/td[@class='resultContent']",
+    [[["/div[@class='heading4']/h2[@class='jobTitle']/span", "Software Engineering - Graduate Programme"]],
+     ["/div[@class='heading6']",
+      [["/span[@class='companyName']/a[@class='turnstileLink']", "NatWest Group"],
+       ["/span[@class='ratingsDisplay']/a[@class='ratingLink']/span[@class='ratingNumber']/span", "3.3"],
+       ["/div[@class='companyLocation']", "Edinburgh"],
+       ["/div[@class='metadata']/div[@class='salary-snippet']/span", "£31,850 a year"]]]]]],
+  ["/table[@class='jobCardShelfContainer']/tbody/tr[@class='underShelfFooter']/td/div[@class='heading6']",
+   [["/div[@class='job-snippet']/ul",
+     [nil,
+      ["/li",
+       ["From home working to job sharing, visit the remote and flexible working page on our website to find out more.",
+        "And on top of your salary, you’ll also have access…"]]]],
+    [[["/span[@class='date']/span[@class='visually-hidden']", "Posted"]]]]]]] 
+</pre>
 
 ## Resources
 
