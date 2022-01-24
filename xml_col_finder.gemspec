@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'xml_col_finder'
-  s.version = '0.2.1'
+  s.version = '0.2.2'
   s.summary = 'Attempts to return the relative xpath for each ' +
       'element containing text.'
   s.authors = ['James Robertson']

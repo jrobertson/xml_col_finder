@@ -30,8 +30,9 @@ class XMLColFinder
 
   end
 
-  def to_code()
+  def to_code(nametip: true)
 
+    @nametip = nametip
     @tags = {}
 
     xpath, remaining = @to_a
@@ -40,7 +41,9 @@ class XMLColFinder
     linex = formatline('doc', eid, xpath)
     a = scan(remaining, eid)
 
-    a.flatten.compact.prepend linex
+    lines = a.flatten.compact.prepend linex
+    lines.join("\n").lines\
+        .map {|line|  line =~ /.text$/ ? 'puts ' + line : line }.join
 
   end
 
@@ -49,8 +52,24 @@ class XMLColFinder
   def formatline(pid, eid=nil, key=nil, tail=nil, index: nil)
 
     if eid then
-      line = "%s = %s.element(\"%s\")" % [eid, pid, key]
-      line += '.text' if tail.is_a? String
+
+      nametip = @nametip && tail.is_a?(String)
+      klass = nametip ? key.scan(/@class=['"]([^'"]+)/).last : nil
+
+      line = if klass then
+        desc = klass[0][/^[^\-]+/].gsub(/(?=[A-Z])/,' ').downcase
+        desc += " (e.g. %s)" % [tail.length < 50 ? tail : tail[0..46] + '...']
+        "\n# " + desc + "\n"
+      else
+        ''
+      end
+
+      line += "%s = %s.element(\"%s\")" % [eid, pid, key]
+      if tail.is_a? String
+        line += '.text'
+        #line += "\n" if nametip
+      end
+
     else
       line = index ? ("%s[%d].text" % [pid, index]) : ("%s.text" % pid)
     end
@@ -191,7 +210,7 @@ class XMLColFinder
           puts '_tail: ' + tail.inspect if @debug
           tline = tail.map.with_index do |x,i|
             formatline(pid=eid, index: i)
-          end.join("\n")
+          end
 
         end
       end
