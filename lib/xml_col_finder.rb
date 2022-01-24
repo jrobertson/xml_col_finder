@@ -12,10 +12,10 @@ class XMLColFinder
   def initialize(s, debug: false)
 
     @debug = debug
-    doc = Rexle.new(s)
+    @doc = Rexle.new(s)
 
     a = []
-    doc.root.each_recursive do |node|
+    @doc.root.each_recursive do |node|
 
       if node.text then
         a << [BacktrackXPath.new(node, ignore_id: true).to_xpath.split('/'),
@@ -47,6 +47,10 @@ class XMLColFinder
 
   end
 
+  def to_doc()
+    @doc
+  end
+
   private
 
   def formatline(pid, eid=nil, key=nil, tail=nil, index: nil)
@@ -60,10 +64,13 @@ class XMLColFinder
         desc = klass[0][/^[^\-]+/].gsub(/(?=[A-Z])/,' ').downcase
         desc += " (e.g. %s)" % [tail.length < 50 ? tail : tail[0..46] + '...']
         "\n# " + desc + "\n"
+      elsif nametip
+        "\n# e.g. %s\n" % [tail.length < 50 ? tail : tail[0..46] + '...']
       else
         ''
       end
 
+      key.gsub!("[@class='']",'') # Rexle XPath bug solution!
       line += "%s = %s.element(\"%s\")" % [eid, pid, key]
       if tail.is_a? String
         line += '.text'
@@ -85,6 +92,8 @@ class XMLColFinder
     tag = case rawtagx.to_sym
     when :a
       'link'
+    when :p
+      'para'
     else
       rawtagx
     end
