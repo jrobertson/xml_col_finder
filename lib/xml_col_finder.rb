@@ -3,28 +3,41 @@
 # file: xml_col_finder.rb
 
 require 'rexle'
+require 'clipboard'
 
+# how to use this gem?
+#
+# 1. Find a web page to fetch values from
+# 2. Press F12 to invoke developer tools
+# 3. right-click on the element containing the
+#    child elements containing the values
+# 4. select copy > copy outerHTML
+# 5. paste the test into a file
+# 6. File.read the txt file and pass it to XMLColFinder.new
+
+# note: There's a to_code method which makes it convenient to fetch the
+#       values from the generated code.
 
 class XMLColFinder
 
   attr_reader :to_a
 
-  def initialize(s, debug: false)
+  def initialize(obj, debug: false)
 
     @debug = debug
-    @doc = Rexle.new(s)
+    @doc = obj.is_a?(Rexle) ? obj : Rexle.new(obj)
 
     a = []
     @doc.root.each_recursive do |node|
 
-      if node.text then
+      if node.text and node.text.strip.length >= 1 then
         a << [BacktrackXPath.new(node, ignore_id: true).to_xpath.split('/'),
               node.text]
       end
 
     end
 
-    #@to_a = a
+    @to_a = a
     h = group_by_xpath(a)
     @to_a = truncate_xpath(h).flatten(1)
 
@@ -42,8 +55,17 @@ class XMLColFinder
     a = scan(remaining, eid)
 
     lines = a.flatten.compact.prepend linex
-    lines.join("\n").lines\
-        .map {|line|  line =~ /.text$/ ? 'puts ' + line : line }.join
+    lines2 = lines.join("\n").lines\
+        .map {|line|  line =~ /.text$/ ? 'puts ' + line : line }
+    lines2[0].sub!(/(?<=\")div/,'//div')
+    s = "require 'nokorexi'
+
+url = 'https://insert-your-url'
+doc = Nokorexi.new(url).to_doc
+" + lines2.join
+
+    Clipboard.copy s
+    return s
 
   end
 
